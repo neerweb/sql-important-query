@@ -1,0 +1,48 @@
+-----MySQL Script for Full Backup of All Databases---------
+
+mysqldump -u root -p --all-databases > /path/to/backup/all_databases_backup.sql
+
+
+----------MySQL Script to Automate Backups with Date------------------
+mysqldump -u root -p --all-databases > /path/to/backup/all_databases_backup_$(date +\%Y\%m\%d).sql
+
+
+
+---------MySQL Stored Procedure for Automatic Backups----------------------
+
+
+DELIMITER //
+
+CREATE PROCEDURE BackupAllDatabases()
+BEGIN
+    SET @backupPath = '/path/to/backup/all_databases_backup.sql';
+    SET @sql = CONCAT('mysqldump -u root -pYourPassword --all-databases > ', @backupPath);
+    SET @cmd = CONCAT('! ', @sql);  -- Executes shell command
+    PREPARE stmt FROM @cmd;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+END //
+
+DELIMITER ;
+
+
+----------You can execute this stored procedure using:------------------
+
+CALL BackupAllDatabases();
+
+
+
+
+---------------- Schedule Automatic Backups (Linux Cron Job)------------------------
+0 2 * * * mysqldump -u root -pYourPassword --all-databases > /path/to/backup/all_databases_backup_$(date +\%Y\%m\%d).sql
+
+
+
+
+
+---------------Schedule Automatic Backups (Windows Task Scheduler)--------------------------
+
+@echo off
+set date=%DATE:~-4,4%%DATE:~-10,2%%DATE:~-7,2%
+mysqldump -u root -pYourPassword --all-databases > "C:\backup\all_databases_backup_%date%.sql"
+
